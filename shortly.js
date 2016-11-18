@@ -22,12 +22,29 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
+//CHANGES
+
+app.get('/login', function(req, res) {
+  res.render('login');
+});
+
+app.get('/signup', function(req,res) {
+  res.render('signup');
+})
+
+//END OF CHANGES
 
 app.get('/', function(req, res) {
   res.render('index');
 });
 
 app.get('/create', function(req, res) {
+  res.render('index');
+});
+
+//Expand on this to add message.
+app.get('/logout', function(req, res) {
+  console.log("TODO: LOGOUT USER AND REDIRECT TO INDEX")
   res.render('index');
 });
 
