@@ -57,13 +57,14 @@ describe('', function() {
         //   message: 'Failed to create test setup data'
         // };
       });
+
   });
 
   describe('Link creation:', function() {
 
     var requestWithSession = request.defaults({jar: true});
 
-    xbeforeEach(function(done) {
+    beforeEach(function(done) {
       // create a user that we can then log-in with
       new User({
         'username': 'Phillip',
@@ -101,7 +102,7 @@ describe('', function() {
       });
     });
 
-    describe('Shortening links:', function() {
+    xdescribe('Shortening links:', function() {
 
       var options = {
         'method': 'POST',
@@ -150,7 +151,7 @@ describe('', function() {
 
     }); // 'Shortening links'
 
-    describe('With previously saved urls:', function() {
+    xdescribe('With previously saved urls:', function() {
 
       var link;
 
@@ -238,7 +239,7 @@ describe('', function() {
 
   }); // 'Priviledged Access'
 
-  xdescribe('Account Creation:', function() {
+  describe('Account Creation:', function() {
 
     it('Signup creates a user record', function(done) {
       var options = {
@@ -254,6 +255,7 @@ describe('', function() {
         db.knex('users')
           .where('username', '=', 'Svnh')
           .then(function(res) {
+            //console.log(res);
             if (res[0] && res[0]['username']) {
               var user = res[0]['username'];
             }
@@ -267,6 +269,7 @@ describe('', function() {
           });
       });
     });
+
 
     it('Signup logs in a new user', function(done) {
       var options = {
@@ -286,7 +289,7 @@ describe('', function() {
 
   }); // 'Account Creation'
 
-  xdescribe('Account Login:', function() {
+  describe('Account Login:', function() {
 
     var requestWithSession = request.defaults({jar: true});
 
@@ -301,6 +304,7 @@ describe('', function() {
 
     it('Logs in existing users', function(done) {
       var options = {
+
         'method': 'POST',
         'uri': 'http://127.0.0.1:4568/login',
         'json': {
@@ -308,7 +312,7 @@ describe('', function() {
           'password': 'Phillip'
         }
       };
-
+      console.log('testing user');
       requestWithSession(options, function(error, res, body) {
         expect(res.headers.location).to.equal('/');
         done();

@@ -51,4 +51,16 @@ db.knex.schema.hasTable('users').then(function(exists) {
   }
 });
 
+// db.knex.schema.hasTable('sessions').then(function(exists) {
+//   if (!exists) {
+//     db.knex.schema.createTable('sessions').then(function(session) {
+//       session.increments('id').primary();
+//       session.string('userid', 255);
+//       session.string('sessionid', 255);
+//     }).then(function (table) {
+//       console.log('Created Table', table);
+//     });
+//   }
+// });
+
 module.exports = db;

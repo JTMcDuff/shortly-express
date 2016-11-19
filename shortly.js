@@ -2,7 +2,7 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
-
+var cookieParser = require('cookie-parser');
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -10,8 +10,15 @@ var User = require('./app/models/user');
 var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
+var uuid = require('uuid');
 
 var app = express();
+
+//Format:  hash: uid;
+var sessions = {};
+//Export for other functions to associate has with uid.
+module.exports.Sessions = sessions;
+
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -22,29 +29,40 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
+//Add the cookie parser middleware
+app.use(express.cookieParser());
+
+
+
 //CHANGES
 
-app.get('/login', function(req, res) {
-  res.render('login');
-});
+ app.get('/login', function(req, res) {
+   res.render('login');
+ });
 
-app.get('/signup', function(req,res) {
-  res.render('signup');
-})
+ app.get('/signup', function(req,res) {
+   res.render('signup');
+ })
+
+// //TESTING ENDPOINT
+// app.get('/test', function(req,res) {
+
+// })
+
+// //Expand on this to add message.
+// app.get('/logout', function(req, res) {
+//   console.log("TODO: LOGOUT USER AND REDIRECT TO INDEX")
+//   res.render('index');
+// });
 
 //END OF CHANGES
 
 app.get('/', function(req, res) {
+  //res.set('session', sessions[])
   res.render('index');
 });
 
 app.get('/create', function(req, res) {
-  res.render('index');
-});
-
-//Expand on this to add message.
-app.get('/logout', function(req, res) {
-  console.log("TODO: LOGOUT USER AND REDIRECT TO INDEX")
   res.render('index');
 });
 
@@ -54,8 +72,11 @@ app.get('/links', function(req, res) {
   });
 });
 
+
 app.post('/links', function(req, res) {
   var uri = req.body.url;
+console.log('serving request for ', req.url)
+
 
   if (!util.isValidUrl(uri)) {
     console.log('Not a valid url: ', uri);
@@ -88,7 +109,52 @@ app.post('/links', function(req, res) {
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+app.post('/signup', function(req, res) {
+  var user = req.body.username;
+  var password = req.body.password;
+  console.log('Running Signup...')
+  new User ( {'username': user, 'password': password} ).fetch()
+    .then (function (exists) {
+      //console.log('passing first then');
+      if(exists) {
+        console.log('Already exists.');
+        res.send(201,'User exists');
+        } //Need some kind of response here?
+      else {
+         new User ( {'username': user, 'password': password}).save()
+         .then(function(model) {
+           console.log('model', model);
+           if(model) {
+             res.set( {location: '/'} );
+             res.send(301, "/");
+           }
+           else { console.log("Something screwed up."); }
 
+         })
+      }
+    })
+})
+// POST REQUEST TO LOGIN PAGE
+app.post('/login', function(req, res) {
+  console.log('running POST login')
+  var user = req.body.username
+  var password = req.body.password
+  new User ({'username': user, 'password': password}).fetch()
+    .then(function (exists) {
+      if (exists) {
+        var sessionID = uuid();
+        sessions[sessionID] = exists.id;
+        //set a cookie:
+        res.cookie('session', sessionID)
+        res.set('session', sessionID );
+        res.send(201, res,cookie.session);
+      }
+      else {
+        res.set({location: '/login'});
+        res.send(201, 'Login Failed.');
+      }
+    })
+});
 
 
 /************************************************************/
